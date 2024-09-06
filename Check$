@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fun Checkers Game</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>Welcome to Fun Checkers!</h1>
+    <div id="gameBoard"></div>
+    <script src="checkers.js"></script>
+</body>
+</html>
+body {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    background-color: #f0f8ff; /* Light blue background */
+    font-family: 'Comic Sans MS', sans-serif; /* Fun font */
+}
+
+h1 {
+    color: #ff4500; /* Bright orange */
+    text-shadow: 2px 2px #ff6347; /* Fun text shadow */
+}
+
+#gameBoard {
+    display: grid;
+    grid-template-columns: repeat(8, 80px); /* Larger squares */
+    grid-template-rows: repeat(8, 80px);
+    border: 5px solid #333;
+    margin-top: 20px;
+}
+
+.square {
+    width: 80px;
+    height: 80px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.white {
+    background-color: #f9f9f9; /* White squares */
+}
+
+.black {
+    background-color: #32cd32; /* Bright green squares */
+}
+
+.red-piece {
+    background-color: #ff4500; /* Orange-red pieces */
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    border: 3px solid #ff6347; /* Fun orange border */
+}
+
+.black-piece {
+    background-color: #1e90ff; /* Dodger blue pieces */
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    border: 3px solid #4682b4; /* Slightly darker blue border */
+}
+
+.selected {
+    border: 3px solid yellow; /* Highlight selected piece */
+}
+
+window.onload = function () {
+    const gameBoard = document.getElementById('gameBoard');
+    const boardSize = 8;
+    let selectedPiece = null; // To store selected piece for moving
+    let currentTurn = 'red'; // Start with red's turn
+
+    // Initial board setup
+    const board = [
+        [null, 'black', null, 'black', null, 'black', null, 'black'],
+        ['black', null, 'black', null, 'black', null, 'black', null],
+        [null, 'black', null, 'black', null, 'black', null, 'black'],
+        [null, null, null, null, null, null, null, null],
+        [null, null, null, null, null, null, null, null],
+        ['red', null, 'red', null, 'red', null, 'red', null],
+        [null, 'red', null, 'red', null, 'red', null, 'red'],
+        ['red', null, 'red', null, 'red', null, 'red', null]
+    ];
+
+    // Function to draw the board
+    function drawBoard() {
+        gameBoard.innerHTML = ''; // Clear the board before drawing
+        for (let row = 0; row < boardSize; row++) {
+            for (let col = 0; col < boardSize; col++) {
+                const square = document.createElement('div');
+                square.classList.add('square');
+                square.dataset.row = row;
+                square.dataset.col = col;
+
+                // Set square color (white or black)
+                if ((row + col) % 2 === 0) {
+                    square.classList.add('white');
+                } else {
+                    square.classList.add('black');
+                }
+
+                // Add pieces (red or black)
+                const piece = board[row][col];
+                if (piece) {
+                    const pieceDiv = document.createElement('div');
+                    pieceDiv.classList.add(piece + '-piece');
+                    pieceDiv.dataset.row = row;
+                    pieceDiv.dataset.col = col;
+                    pieceDiv.addEventListener('click', onPieceClick);
+                    square.appendChild(pieceDiv);
+                }
+
+                gameBoard.appendChild(square);
+            }
+        }
+    }
+
+    // Function to handle piece selection
+    function onPieceClick(event) {
+        const piece = event.target;
+        const row = parseInt(piece.dataset.row);
+        const col = parseInt(piece.dataset.col);
+
+        // Highlight selected piece
+        if (selectedPiece) {
+            selectedPiece.classList.remove('selected');
+        }
+        selectedPiece = piece;
+        selectedPiece.classList.add('selected');
+    }
+
+    // Function to move the piece
+    function movePiece(targetSquare) {
+        const targetRow = parseInt(targetSquare.dataset.row);
+        const targetCol = parseInt(targetSquare.dataset.col);
+
+        if (selectedPiece) {
+            const pieceRow = parseInt(selectedPiece.dataset.row);
+            const pieceCol = parseInt(selectedPiece.dataset.col);
+
+            // Move the selected piece to the target square
+            if (Math.abs(targetRow - pieceRow) === 1 && Math.abs(targetCol - pieceCol) === 1) {
+                board[targetRow][targetCol] = board[pieceRow][pieceCol]; // Move piece
+                board[pieceRow][pieceCol] = null; // Clear the old square
+                selectedPiece = null; // Deselect the piece
+
+                // Switch turns
+                currentTurn = currentTurn === 'red' ? 'black' : 'red';
+                drawBoard();
+            } else {
+                alert('Invalid move! Pieces can only move diagonally.');
+            }
+        }
+    }
+
+    // Handle board square clicks for moving pieces
+    gameBoard.addEventListener('click', function (event) {
+        if (event.target.classList.contains('square')) {
+            movePiece(event.target);
+        }
+    });
+
+    drawBoard(); // Initial draw of the game board
+};
